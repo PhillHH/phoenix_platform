@@ -256,9 +256,9 @@ public:
     void findPeakBoundaries(const LineProfile& profile, uint16_t center,
                             uint16_t expected_width, PeakDescriptor& peak) {
         uint16_t half_w = expected_width / 2;
-        uint16_t expect_left = (center > half_w + 20) ? center - half_w - 20 : 0;
-        uint16_t expect_right = (center + half_w + 20 < profile.length) ?
-                                 center + half_w + 20 : profile.length - 1;
+        uint16_t expect_left = static_cast<uint16_t>((center > half_w + 20) ? center - half_w - 20 : 0);
+        uint16_t expect_right = static_cast<uint16_t>((center + half_w + 20 < profile.length) ?
+                                 center + half_w + 20 : profile.length - 1);
         float baseline = 0; int bl_count = 0;
         for (uint16_t i = expect_left; i < center - half_w && i < profile.length; i++) {
             baseline += profile.data[i]; bl_count++;
@@ -266,7 +266,7 @@ public:
         for (uint16_t i = center + half_w; i <= expect_right && i < profile.length; i++) {
             baseline += profile.data[i]; bl_count++;
         }
-        if (bl_count > 0) baseline /= bl_count;
+        if (bl_count > 0) baseline /= static_cast<float>(bl_count);
 
         float center_val = profile.data[center];
         float half_height = (baseline + center_val) / 2.0f;
@@ -310,7 +310,7 @@ public:
         for (uint16_t i = peak.left_peak_idx; i <= peak.right_peak_idx; i++) {
             sum += (baseline - profile.data[i]); count++;
         }
-        peak.value = (count > 0) ? sum / count : 0;
+        peak.value = (count > 0) ? sum / static_cast<float>(count) : 0;
 
         peak.integral = 0;
         for (uint16_t i = peak.left_limit_idx; i <= peak.right_limit_idx; i++) {
@@ -449,19 +449,19 @@ LineProfile generateSyntheticProfile(float cl_depth, float tl1_depth, float tl2_
 
     // Control line at ~idx 47, width ~44 (Gaussian dip)
     for (int i = 20; i < 75; i++) {
-        float x = (i - 47.0f) / 10.0f;
+        float x = (static_cast<float>(i) - 47.0f) / 10.0f;
         profile.data[i] = 165.0f - cl_depth * expf(-0.5f * x * x);
     }
 
     // Test line 1 at ~idx 138, width ~46
     for (int i = 110; i < 165; i++) {
-        float x = (i - 138.0f) / 10.0f;
+        float x = (static_cast<float>(i) - 138.0f) / 10.0f;
         profile.data[i] = 165.0f - tl1_depth * expf(-0.5f * x * x);
     }
 
     // Test line 2 at ~idx 247, width ~44
     for (int i = 220; i < 275; i++) {
-        float x = (i - 247.0f) / 10.0f;
+        float x = (static_cast<float>(i) - 247.0f) / 10.0f;
         profile.data[i] = 165.0f - tl2_depth * expf(-0.5f * x * x);
     }
 
@@ -535,6 +535,7 @@ static int tests_passed = 0;
 static int tests_failed = 0;
 
 static void check(bool condition, const char* test_name) {
+    (void)test_name;
     if (condition) {
         tests_passed++;
         ESP_LOGI("TEST", "  PASS: %s", test_name);
@@ -545,6 +546,7 @@ static void check(bool condition, const char* test_name) {
 }
 
 static void check_float(float actual, float expected, float tolerance, const char* name) {
+    (void)name;
     float diff = fabsf(actual - expected);
     bool ok = diff <= tolerance;
     if (ok) {
@@ -627,6 +629,7 @@ static void test_5pl_math() {
                     "5PL roundtrip");
         ESP_LOGI("TEST", "    conc=%.1f → signal=%.5f → recovered=%.2f (%.1f%% error)",
                  (double)conc, (double)signal, (double)recovered, (double)err_pct);
+        (void)err_pct;
     }
 
     // Edge cases
@@ -685,6 +688,7 @@ static void test_peak_detection() {
         float tc1 = peaks[1].value / peaks[0].value;
         float tc2 = peaks[2].value / peaks[0].value;
         ESP_LOGI("TEST", "  T/C ratios: TL1=%.4f, TL2=%.4f", (double)tc1, (double)tc2);
+        (void)tc2;
         check(tc1 > 0.0f && tc1 < 1.0f, "TL1 T/C ratio in valid range");
     }
 
@@ -711,6 +715,7 @@ static void test_ipc_protocol() {
     const uint8_t test2[] = {0xF0};  // PING command
     uint16_t crc2 = crc16(test2, 1);
     ESP_LOGI("TEST", "  CRC16(PING) = 0x%04X", crc2);
+    (void)crc2;
 
     // Build and parse frame: PING (no payload)
     uint8_t frame[64];
@@ -842,11 +847,11 @@ static void test_led_control() {
     // PWM ramp test on green LED
     ESP_LOGI("TEST", "  PWM ramp on green LED...");
     for (int duty = 0; duty <= 255; duty += 15) {
-        led_set(CH_G, duty);
+        led_set(CH_G, static_cast<uint8_t>(duty));
         vTaskDelay(pdMS_TO_TICKS(30));
     }
     for (int duty = 255; duty >= 0; duty -= 15) {
-        led_set(CH_G, duty);
+        led_set(CH_G, static_cast<uint8_t>(duty));
         vTaskDelay(pdMS_TO_TICKS(30));
     }
     led_all_off();
@@ -905,6 +910,7 @@ static void test_safety_checks() {
 
     ESP_LOGI("TEST", "  Free heap: %u bytes (%.1f kB)", free_heap, (double)free_heap / 1024.0);
     ESP_LOGI("TEST", "  Min free:  %u bytes (%.1f kB)", min_heap, (double)min_heap / 1024.0);
+    (void)min_heap;
 
     check(free_heap > 16 * 1024, "Heap > 16 kB (critical threshold)");
     check(free_heap > 32 * 1024, "Heap > 32 kB (warning threshold)");
@@ -933,13 +939,14 @@ static void test_safety_checks() {
     // Uptime
     uint32_t uptime = static_cast<uint32_t>(esp_timer_get_time() / 1000000ULL);
     ESP_LOGI("TEST", "  Uptime: %u seconds", uptime);
+    (void)uptime;
 }
 
 // ══════════════════════════════════════════════════════════════════════════
 // SECTION 9: Entry Point
 // ══════════════════════════════════════════════════════════════════════════
 
-static void phoenix_main_task(void* arg) {
+static void phoenix_main_task(void* /*arg*/) {
     ESP_LOGI(TAG, "");
     ESP_LOGI(TAG, "══════════════════════════════════════════════════════════");
     ESP_LOGI(TAG, " Phoenix v108.0 Chimera — Wokwi Integration Test");

@@ -66,7 +66,7 @@ target_compile_options(${COMPONENT_LIB} PRIVATE
     -Wall -Wextra -Wpedantic
     -Wshadow
     -fno-exceptions -fno-rtti
-    # -Werror -Wconversion  # Re-enable after all warnings are resolved
+    -Werror -Wconversion
 )
 
 target_compile_definitions(${COMPONENT_LIB} PRIVATE
