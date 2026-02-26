@@ -262,8 +262,8 @@ inline AssayConfig getVerifiedIgEAssay() {
 
     // Line definitions (from MCP project.json)
     cfg.lines[0] = {"ctrl", true,  33.3f, 44.2f, 0, "ctrl"};
-    cfg.lines[1] = {"tl1",  false, 138.3f, 45.6f, 2, cfg.id};
-    cfg.lines[2] = {"tl2",  false, 247.1f, 43.9f, 3, cfg.id};
+    cfg.lines[1] = {"tl1",  false, 138.3f, 45.6f, 2, cfg.id.c_str()};
+    cfg.lines[2] = {"tl2",  false, 247.1f, 43.9f, 3, cfg.id.c_str()};
     cfg.num_lines = 3;
 
     return cfg;

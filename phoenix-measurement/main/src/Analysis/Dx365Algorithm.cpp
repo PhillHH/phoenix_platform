@@ -337,7 +337,7 @@ Result<Dx365MeasurementResult> Dx365MeasurementPipeline::processProfile(
     for (uint8_t i = 0; i < assay_.num_lines; i++) {
         if (!assay_.lines[i].is_control && i < result.num_peaks) {
             auto& ar = result.assay_results[result.num_assay_results];
-            ar.assay_id = assay_.lines[i].assay_id;
+            ar.assay_id = assay_.lines[i].assay_id.c_str();
             ar.intensity = result.peaks[i].value;
             ar.original_intensity = result.peaks[i].value;
             result.num_assay_results++;
