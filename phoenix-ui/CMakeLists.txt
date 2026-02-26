@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.16)
+# Phoenix v108.0 "Chimera" — ESP32 #1 UI/Connectivity MCU
+option(PHOENIX_WIFI_ENABLED  "Enable WiFi"  ON)
+option(PHOENIX_LIMS_ENABLED  "Enable LIMS"  ON)
+option(PHOENIX_OTA_ENABLED   "Enable OTA"   ON)
+option(PHOENIX_NFC_ENABLED   "Enable NFC"   ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(phoenix_ui_mcu)

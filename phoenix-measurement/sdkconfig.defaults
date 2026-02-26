@@ -1,0 +1,50 @@
+# ==========================================================================
+# Phoenix v108.0 — ESP32 #2 Measurement MCU SDK Configuration
+# Target: ESP32-WROOM-32D (Igloo Pro)
+# ==========================================================================
+
+# ─── Target ────────────────────────────────────────────────────────────
+CONFIG_IDF_TARGET="esp32"
+
+# ─── Flash ─────────────────────────────────────────────────────────────
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+
+# ─── PSRAM (4MB on ESP32-WROOM-32D) ───────────────────────────────────
+CONFIG_ESP32_SPIRAM_SUPPORT=y
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_USE_MALLOC=y
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=4096
+
+# ─── CPU ───────────────────────────────────────────────────────────────
+CONFIG_ESP32_DEFAULT_CPU_FREQ_240=y
+CONFIG_FREERTOS_HZ=1000
+
+# ─── Camera ────────────────────────────────────────────────────────────
+# esp32-camera component required
+CONFIG_CAMERA_TASK_STACK_SIZE=4096
+CONFIG_CAMERA_CORE1=y
+
+# ─── UART ──────────────────────────────────────────────────────────────
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_UART_NUM=0
+# UART0 = debug console, UART1 = IPC to UI MCU
+
+# ─── NVS ───────────────────────────────────────────────────────────────
+CONFIG_NVS_DEFAULT_PART_LABEL="nvs"
+
+# ─── Watchdog ──────────────────────────────────────────────────────────
+CONFIG_ESP_TASK_WDT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+
+# ─── Logging ───────────────────────────────────────────────────────────
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_DEBUG=y
+
+# ─── Stack overflow detection ──────────────────────────────────────────
+CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY=y
+
+# ─── Heap corruption detection ─────────────────────────────────────────
+CONFIG_HEAP_POISONING_COMPREHENSIVE=y
