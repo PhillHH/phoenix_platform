@@ -13,40 +13,87 @@
     {
       "type": "wokwi-led",
       "id": "led-red",
-      "top": -80,
-      "left": 100,
-      "attrs": { "color": "red" }
+      "top": -100,
+      "left": 80,
+      "attrs": { "color": "red", "label": "R (GPIO2)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r-red",
+      "top": -60,
+      "left": 80,
+      "attrs": { "value": "220" }
     },
     {
       "type": "wokwi-led",
       "id": "led-green",
-      "top": -80,
+      "top": -100,
       "left": 140,
-      "attrs": { "color": "green" }
+      "attrs": { "color": "green", "label": "G (GPIO14)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r-green",
+      "top": -60,
+      "left": 140,
+      "attrs": { "value": "220" }
     },
     {
       "type": "wokwi-led",
       "id": "led-blue",
-      "top": -80,
-      "left": 180,
-      "attrs": { "color": "blue" }
+      "top": -100,
+      "left": 200,
+      "attrs": { "color": "blue", "label": "B (GPIO13)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r-blue",
+      "top": -60,
+      "left": 200,
+      "attrs": { "value": "220" }
     },
     {
       "type": "wokwi-led",
       "id": "led-white",
-      "top": -80,
-      "left": 220,
-      "attrs": { "color": "white" }
+      "top": -100,
+      "left": 260,
+      "attrs": { "color": "white", "label": "W (GPIO4)" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r-white",
+      "top": -60,
+      "left": 260,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn-test",
+      "top": 100,
+      "left": 260,
+      "attrs": { "color": "green", "label": "TEST" }
     }
   ],
   "connections": [
-    ["esp:2", "led-red:A", "red", ["v0"]],
+    ["esp:2", "r-red:1", "red", ["v0"]],
+    ["r-red:2", "led-red:A", "red", ["v0"]],
     ["led-red:C", "esp:GND.1", "black", ["v0"]],
-    ["esp:14", "led-green:A", "green", ["v0"]],
+
+    ["esp:14", "r-green:1", "green", ["v0"]],
+    ["r-green:2", "led-green:A", "green", ["v0"]],
     ["led-green:C", "esp:GND.1", "black", ["v0"]],
-    ["esp:13", "led-blue:A", "blue", ["v0"]],
+
+    ["esp:13", "r-blue:1", "blue", ["v0"]],
+    ["r-blue:2", "led-blue:A", "blue", ["v0"]],
     ["led-blue:C", "esp:GND.1", "black", ["v0"]],
-    ["esp:4", "led-white:A", "white", ["v0"]],
-    ["led-white:C", "esp:GND.1", "black", ["v0"]]
+
+    ["esp:4", "r-white:1", "white", ["v0"]],
+    ["r-white:2", "led-white:A", "white", ["v0"]],
+    ["led-white:C", "esp:GND.1", "black", ["v0"]],
+
+    ["esp:TX", "esp:RX", "purple", ["v-20", "h40"]],
+
+    ["btn-test:1.l", "esp:15", "orange", ["v0"]],
+    ["btn-test:2.l", "esp:GND.2", "black", ["v0"]]
   ]
 }
