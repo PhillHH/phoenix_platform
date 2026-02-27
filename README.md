@@ -142,6 +142,15 @@ phoenix_platform/
 | [API Reference](docs/API_REFERENCE.md) | Module APIs, error codes, code examples |
 | [Regulatory](docs/REGULATORY.md) | IEC 62304 compliance, SOUP list, traceability |
 
+### Operations Runbooks
+
+| Runbook | Audience | Description |
+|---|---|---|
+| [Manufacturing](docs/runbooks/MANUFACTURING.md) | Production technicians | Flash, POST, calibration, QC procedure |
+| [Troubleshooting](docs/runbooks/TROUBLESHOOTING.md) | All technicians | Symptom → Diagnosis → Fix tables |
+| [Field Service](docs/runbooks/FIELD_SERVICE.md) | Field service | OTA/USB update, recalibration, diagnostics |
+| [Development](docs/runbooks/DEVELOPMENT.md) | Developers | Environment setup, build, debug, CI/CD |
+
 ## Technology Stack
 
 | Component | Technology |
