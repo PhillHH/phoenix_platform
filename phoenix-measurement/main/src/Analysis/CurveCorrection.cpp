@@ -149,7 +149,7 @@ private:
         // Back-substitution
         for (int i = p - 1; i >= 0; --i) {
             coeffs[i] = A[i][p];
-            for (uint8_t j = i + 1; j < p; ++j) {
+            for (int j = i + 1; j < p; ++j) {
                 coeffs[i] -= A[i][j] * coeffs[j];
             }
             if (fabsf(A[i][i]) > 1e-12f)

@@ -169,6 +169,7 @@ private:
 
     static void platformOutput(LogLevel level, const char* tag, const char* msg) {
 #ifndef PHOENIX_HOST_TEST
+        (void)level; (void)tag; (void)msg;  // Suppress unused-parameter when ESP_LOG is stubbed
         switch (level) {
             case LogLevel::TRACE: ESP_LOGD(tag, "%s", msg); break;
             case LogLevel::DEBUG: ESP_LOGD(tag, "%s", msg); break;

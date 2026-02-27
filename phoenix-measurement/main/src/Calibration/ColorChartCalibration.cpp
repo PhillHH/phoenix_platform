@@ -194,8 +194,8 @@ float ColorChartCalibrator::computeLinearity() const {
         sum_exp += expected_lum[i];
         sum_meas += measured[i];
     }
-    float mean_exp = sum_exp / NUM_STRIPS;
     float mean_meas = sum_meas / NUM_STRIPS;
+    (void)sum_exp;  // Used only for debug logging when needed
     
     float ss_tot = 0, ss_res = 0;
     for (size_t i = 0; i < NUM_STRIPS; i++) {
@@ -254,9 +254,10 @@ Result<ColorChartCalibrationResult> ColorChartCalibrator::computeCalibration() {
     
     // Step 5: Non-linearity (quadratic fit through Black, Gold, White)
     // Using 3-point fit: (0, dark), (0.363, gold), (1.0, white)
-    float x0 = 0.0f, y0 = dark;
+    float y0 = dark;
     float x1 = 0.363f, y1 = readings_[2].raw_intensity;
     float x2 = 1.0f, y2 = white;
+    (void)x2;  // x2=1.0 used implicitly in quadratic derivation below
     
     // Solve: y = a*x² + b*x + c with 3 points
     // c = y0 = dark

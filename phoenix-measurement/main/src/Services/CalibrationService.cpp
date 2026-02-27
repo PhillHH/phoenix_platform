@@ -20,7 +20,7 @@ static const char* TAG = "CalSvc";
 Result<void> CalibrationService::startCalibrationWorkflow(const char* analyte) {
     workflow_active_ = true;
     workflow_count_  = 0;
-    memset(workflow_pts_, 0, sizeof(workflow_pts_));
+    for (auto& pt : workflow_pts_) { pt = {}; }
 
     active_ = {};
     active_.analyte = analyte;

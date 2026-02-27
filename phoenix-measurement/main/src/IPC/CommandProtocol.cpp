@@ -83,7 +83,7 @@ private:
     CalibrationService*  cal_      = nullptr;
     SafetyManager*       safety_   = nullptr;
 
-    Result<void> handleStartMeasurement(const uint8_t* payload, size_t len) {
+    Result<void> handleStartMeasurement(const uint8_t* /* payload */, size_t /* len */) {
         if (!pipeline_) {
             return uart_->sendError(ErrorCategory::NOT_INITIALIZED, "No pipeline");
         }

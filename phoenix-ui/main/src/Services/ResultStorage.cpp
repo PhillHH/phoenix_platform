@@ -198,8 +198,8 @@ private:
     bool         ready_ = false;
 
     uint32_t ringStart() const {
-        return (idx_.write_idx > MAX_STORED_RESULTS)
-            ? idx_.write_idx - MAX_STORED_RESULTS : 0;
+        return (idx_.write_idx > static_cast<uint32_t>(MAX_STORED_RESULTS))
+            ? static_cast<uint32_t>(idx_.write_idx - MAX_STORED_RESULTS) : 0u;
     }
 
     template <typename Pred>

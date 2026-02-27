@@ -47,9 +47,9 @@ void Dx365PeakDetector::findPeakBoundaries(
 {
     // Compute local baseline (average of regions outside the peak)
     uint16_t half_w = expected_width / 2;
-    uint16_t expect_left = (center > half_w + 20) ? center - half_w - 20 : 0;
+    uint16_t expect_left = (center > half_w + 20) ? static_cast<uint16_t>(center - half_w - 20) : uint16_t(0);
     uint16_t expect_right = (center + half_w + 20 < profile.length) ?
-                             center + half_w + 20 : profile.length - 1;
+                             static_cast<uint16_t>(center + half_w + 20) : static_cast<uint16_t>(profile.length - 1);
 
     // Find where signal rises back to 50% of baseline (peak boundaries)
     float baseline = 0;
@@ -65,7 +65,7 @@ void Dx365PeakDetector::findPeakBoundaries(
         baseline += profile.data[i];
         bl_count++;
     }
-    if (bl_count > 0) baseline /= bl_count;
+    if (bl_count > 0) baseline /= static_cast<float>(bl_count);
 
     float center_val = profile.data[center];
     float half_height = (baseline + center_val) / 2.0f;
@@ -136,7 +136,7 @@ void Dx365PeakDetector::computePeakMetrics(
         sum += (baseline - profile.data[i]);
         count++;
     }
-    peak.value = (count > 0) ? sum / count : 0;
+    peak.value = (count > 0) ? sum / static_cast<float>(count) : 0;
 
     // Integral: total area under the peak
     peak.integral = 0;
@@ -202,7 +202,7 @@ Result<void> Dx365PeakDetector::detectPeaks(
 }
 
 float Dx365PeakDetector::computePeakValue(
-    const LineProfile& profile,
+    const LineProfile& /* profile */,
     const PeakDescriptor& peak)
 {
     return peak.value;
@@ -245,7 +245,7 @@ LineProfile Dx365MeasurementPipeline::extractProfile(
     if (roi_x + roi_w > image_width) roi_w = image_width - roi_x;
     if (roi_y + roi_h > image_height) roi_h = image_height - roi_y;
 
-    profile.length = (roi_h < MAX_PROFILE_LEN) ? roi_h : MAX_PROFILE_LEN;
+    profile.length = static_cast<uint16_t>((roi_h < MAX_PROFILE_LEN) ? roi_h : MAX_PROFILE_LEN);
 
     // Average across ROI width for each row (creating 1D profile)
     for (uint32_t row = 0; row < profile.length; row++) {
@@ -259,7 +259,7 @@ LineProfile Dx365MeasurementPipeline::extractProfile(
                 sum += image_data[offset + 1]; // Green channel
             }
         }
-        profile.data[row] = sum / roi_w;
+        profile.data[row] = sum / static_cast<float>(roi_w);
     }
 
     PHOENIX_LOGI(TAG, "Profile extracted: %d points, range %.1f–%.1f",

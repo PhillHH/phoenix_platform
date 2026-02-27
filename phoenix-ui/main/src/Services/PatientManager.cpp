@@ -58,7 +58,7 @@ public:
         }
         nvs_close(h);
         ready_ = true;
-        ESP_LOGI(TAG, "Loaded: %lu patients", idx_.count);
+        ESP_LOGI(TAG, "Loaded: %u patients", static_cast<unsigned>(idx_.count));
         return Ok();
     }
 
@@ -83,7 +83,7 @@ public:
             return Err<uint32_t>(ErrorCategory::HARDWARE_FAILURE, "NVS");
 
         char key[12];
-        snprintf(key, sizeof(key), "p%05lu", rec.patient_id);
+        snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(rec.patient_id));
         nvs_set_blob(h, key, &rec, sizeof(rec));
         idx_.count++;
         idx_.next_id++;
@@ -91,7 +91,7 @@ public:
         nvs_commit(h);
         nvs_close(h);
 
-        ESP_LOGI(TAG, "Created #%lu: %s (%s)", rec.patient_id, rec.display_id, rec.initials);
+        ESP_LOGI(TAG, "Created #%u: %s (%s)", static_cast<unsigned>(rec.patient_id), rec.display_id, rec.initials);
         return Ok(rec.patient_id);
     }
 
@@ -102,7 +102,7 @@ public:
             return Err<PatientRecord>(ErrorCategory::NOT_FOUND, "NVS");
 
         char key[12];
-        snprintf(key, sizeof(key), "p%05lu", id);
+        snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(id));
         PatientRecord rec;
         size_t sz = sizeof(rec);
         esp_err_t err = nvs_get_blob(h, key, &rec, &sz);
@@ -121,7 +121,7 @@ public:
 
         for (uint32_t id = 1; id < idx_.next_id; ++id) {
             char key[12];
-            snprintf(key, sizeof(key), "p%05lu", id);
+            snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(id));
             PatientRecord rec;
             size_t sz = sizeof(rec);
             if (nvs_get_blob(h, key, &rec, &sz) == ESP_OK && rec.isValid() && rec.active) {
@@ -143,7 +143,7 @@ public:
         uint32_t n = 0;
         for (uint32_t id = idx_.next_id; id > 0 && n < max_n; --id) {
             char key[12];
-            snprintf(key, sizeof(key), "p%05lu", id - 1 + 1);
+            snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(id));
             PatientRecord rec;
             size_t sz = sizeof(rec);
             if (nvs_get_blob(h, key, &rec, &sz) == ESP_OK && rec.isValid() && rec.active)
@@ -159,7 +159,7 @@ public:
             return Err(ErrorCategory::HARDWARE_FAILURE, "NVS");
 
         char key[12];
-        snprintf(key, sizeof(key), "p%05lu", patient_id);
+        snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(patient_id));
         PatientRecord rec;
         size_t sz = sizeof(rec);
         if (nvs_get_blob(h, key, &rec, &sz) == ESP_OK && rec.isValid()) {
@@ -179,7 +179,7 @@ public:
             return Err(ErrorCategory::HARDWARE_FAILURE, "NVS");
 
         char key[12];
-        snprintf(key, sizeof(key), "p%05lu", patient_id);
+        snprintf(key, sizeof(key), "p%05u", static_cast<unsigned>(patient_id));
         PatientRecord rec;
         size_t sz = sizeof(rec);
         if (nvs_get_blob(h, key, &rec, &sz) == ESP_OK && rec.isValid()) {
@@ -188,7 +188,7 @@ public:
             memset(rec.notes, 0, sizeof(rec.notes));
             nvs_set_blob(h, key, &rec, sizeof(rec));
             nvs_commit(h);
-            ESP_LOGI(TAG, "Patient #%lu deactivated (GDPR)", patient_id);
+            ESP_LOGI(TAG, "Patient #%u deactivated (GDPR)", static_cast<unsigned>(patient_id));
         }
         nvs_close(h);
         return Ok();

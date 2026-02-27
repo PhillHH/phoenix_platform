@@ -304,9 +304,9 @@ Result<ROI> MeasurementPipeline::detectROI(const ImageBuffer& image) {
 
 // ─── Analyze Profile and Build Result ─────────────────────────────────
 Result<MeasurementResult> MeasurementPipeline::analyzeProfile(
-    const Profile1D& corrected,
+    const Profile1D& /* corrected */,
     const PeakResult& peak_data,
-    const PipelineConfig& config)
+    const PipelineConfig& /* config */)
 {
     MeasurementResult result = {};
     result.timestamp = static_cast<uint32_t>(

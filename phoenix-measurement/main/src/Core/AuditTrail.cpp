@@ -62,18 +62,18 @@ public:
         nvs_get_u32(handle, "write_idx", &idx);
 
         char key[16];
-        snprintf(key, sizeof(key), "e%05lu", idx % 1000);  // Ring buffer of 1000
+        snprintf(key, sizeof(key), "e%05u", static_cast<unsigned>(idx % 1000));  // Ring buffer of 1000
 
         nvs_set_blob(handle, key, &entry, sizeof(entry));
         nvs_set_u32(handle, "write_idx", idx + 1);
         nvs_commit(handle);
         nvs_close(handle);
 
-        const char* sev_str[] = {"INFO", "WARN", "ERROR", "CRIT"};
-        ESP_LOGI(TAG, "[%s] %s: %s",
+        static const char* const sev_str[] = {"INFO", "WARN", "ERROR", "CRIT"};
+        (void)sev_str;
+        ESP_LOGI(TAG, "[%s] %s",
                  sev_str[severity & 3],
-                 msg ? msg : "",
-                 msg ? "" : "(no message)");
+                 msg ? msg : "(no message)");
 
         return Ok();
     }
