@@ -5,7 +5,7 @@
 // ==========================================================================
 
 #include "phoenix/IPC/UartBridge.h"
-#include <esp_log.h>
+#include "phoenix/Core/Logger.h"
 #include <driver/uart.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -69,7 +69,7 @@ Result<void> UartBridge::initialize(const UartConfig& config) {
     }
 
     initialized_ = true;
-    ESP_LOGI(TAG, "UART%d initialized: %u baud, TX=%d RX=%d",
+    PHOENIX_LOGI(TAG, "UART%d initialized: %u baud, TX=%d RX=%d",
              config.uart_num, config.baud_rate,
              config.tx_pin, config.rx_pin);
     return Ok();
@@ -189,7 +189,7 @@ Result<size_t> UartBridge::receiveFrame(
 
     if (received_crc != computed_crc) {
         err_count_++;
-        ESP_LOGW(TAG, "CRC mismatch: recv=0x%04X calc=0x%04X",
+        PHOENIX_LOGW(TAG, "CRC mismatch: recv=0x%04X calc=0x%04X",
                  received_crc, computed_crc);
         return Err<size_t>(ErrorCategory::COMMUNICATION_ERROR, "CRC error");
     }
@@ -281,7 +281,7 @@ Result<void> UartBridge::ping(uint32_t timeout_ms) {
         return Err(ErrorCategory::COMMUNICATION_ERROR, "Expected PONG");
     }
 
-    ESP_LOGD(TAG, "Ping OK");
+    PHOENIX_LOGD(TAG, "Ping OK");
     return Ok();
 }
 

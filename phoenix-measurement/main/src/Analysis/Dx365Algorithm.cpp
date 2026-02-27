@@ -4,7 +4,7 @@
 // All parameters verified against 44 real MCP measurements
 // ==========================================================================
 #include "phoenix/Analysis/Dx365Algorithm.h"
-#include <esp_log.h>
+#include "phoenix/Core/Logger.h"
 #include <cstring>
 #include <algorithm>
 
@@ -190,7 +190,7 @@ Result<void> Dx365PeakDetector::detectPeaks(
         out_peaks[i] = peak;
         out_count++;
 
-        ESP_LOGI(TAG, "Peak %d: center=%d, value=%.2f, height=%.2f, integral=%.1f, valid=%d",
+        PHOENIX_LOGI(TAG, "Peak %d: center=%d, value=%.2f, height=%.2f, integral=%.1f, valid=%d",
                  i, peak.center_idx,
                  static_cast<double>(peak.value),
                  static_cast<double>(peak.height),
@@ -223,7 +223,7 @@ float Dx365PeakDetector::computeTCRatio(
 void Dx365MeasurementPipeline::configure(const AssayConfig& assay, const ROIConfig& roi) {
     assay_ = assay;
     roi_ = roi;
-    ESP_LOGI(TAG, "Pipeline configured: %s, %d lines, ROI %.1f×%.1f mm",
+    PHOENIX_LOGI(TAG, "Pipeline configured: %s, %d lines, ROI %.1f×%.1f mm",
              assay.name.c_str(), assay.num_lines,
              static_cast<double>(roi.w_mm), static_cast<double>(roi.h_mm));
 }
@@ -262,7 +262,7 @@ LineProfile Dx365MeasurementPipeline::extractProfile(
         profile.data[row] = sum / roi_w;
     }
 
-    ESP_LOGI(TAG, "Profile extracted: %d points, range %.1f–%.1f",
+    PHOENIX_LOGI(TAG, "Profile extracted: %d points, range %.1f–%.1f",
              profile.length,
              static_cast<double>(*std::min_element(profile.data, profile.data + profile.length)),
              static_cast<double>(*std::max_element(profile.data, profile.data + profile.length)));
@@ -289,7 +289,7 @@ void Dx365MeasurementPipeline::computeConcentrations(
 
         ar.concentration = concentration;
 
-        ESP_LOGI(TAG, "Assay %s: intensity=%.3f, T/C=%.4f → conc=%.1f",
+        PHOENIX_LOGI(TAG, "Assay %s: intensity=%.3f, T/C=%.4f → conc=%.1f",
                  ar.assay_id.c_str(),
                  static_cast<double>(ar.intensity),
                  static_cast<double>(tc_ratio),
@@ -300,7 +300,7 @@ void Dx365MeasurementPipeline::computeConcentrations(
 Result<Dx365MeasurementResult> Dx365MeasurementPipeline::processProfile(
     const LineProfile& profile)
 {
-    ESP_LOGI(TAG, "Processing profile (%d points)", profile.length);
+    PHOENIX_LOGI(TAG, "Processing profile (%d points)", profile.length);
 
     Dx365MeasurementResult result = {};
     result.profile = profile;
@@ -328,7 +328,7 @@ Result<Dx365MeasurementResult> Dx365MeasurementPipeline::processProfile(
     }
 
     if (result.control_line_intensity < 1.0f) {
-        ESP_LOGW(TAG, "Control line weak (%.2f) — measurement may be unreliable",
+        PHOENIX_LOGW(TAG, "Control line weak (%.2f) — measurement may be unreliable",
                  static_cast<double>(result.control_line_intensity));
     }
 
@@ -349,7 +349,7 @@ Result<Dx365MeasurementResult> Dx365MeasurementPipeline::processProfile(
 
     result.succeeded = (result.control_line_intensity >= 1.0f);
 
-    ESP_LOGI(TAG, "Measurement %s: CL=%.2f, %d assay results",
+    PHOENIX_LOGI(TAG, "Measurement %s: CL=%.2f, %d assay results",
              result.succeeded ? "SUCCEEDED" : "FAILED",
              static_cast<double>(result.control_line_intensity),
              result.num_assay_results);
@@ -362,7 +362,7 @@ Result<Dx365MeasurementResult> Dx365MeasurementPipeline::process(
     uint32_t image_width,
     uint32_t image_height)
 {
-    ESP_LOGI(TAG, "Processing image %dx%d", image_width, image_height);
+    PHOENIX_LOGI(TAG, "Processing image %dx%d", image_width, image_height);
 
     // Step 1: Extract profile
     LineProfile profile = extractProfile(image_data, image_width, image_height);
@@ -378,7 +378,7 @@ void Dx365MeasurementPipeline::applyCalibration(LineProfile& profile) {
     // Color Chart calibration is applied here
     // In demo mode, profile is already calibrated
     // In live mode, the ColorChartCalibrator adjusts gain/offset/gamma
-    ESP_LOGD(TAG, "Calibration applied to %d-point profile", profile.length);
+    PHOENIX_LOGD(TAG, "Calibration applied to %d-point profile", profile.length);
 }
 
 } // namespace phoenix

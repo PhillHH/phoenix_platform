@@ -4,7 +4,7 @@
 // ==========================================================================
 
 #include "phoenix/Services/CalibrationService.h"
-#include <esp_log.h>
+#include "phoenix/Core/Logger.h"
 #include <esp_timer.h>
 #include <nvs_flash.h>
 #include <nvs.h>
@@ -26,7 +26,7 @@ Result<void> CalibrationService::startCalibrationWorkflow(const char* analyte) {
     active_.analyte = analyte;
     active_.created_at = static_cast<uint32_t>(esp_timer_get_time() / 1000000ULL);
 
-    ESP_LOGI(TAG, "Calibration workflow started for: %s", analyte);
+    PHOENIX_LOGI(TAG, "Calibration workflow started for: %s", analyte);
     return Ok();
 }
 
@@ -46,7 +46,7 @@ Result<void> CalibrationService::addCalibrationPoint(
     pt.replicates    = 1;
     workflow_count_++;
 
-    ESP_LOGI(TAG, "Cal point %u: conc=%.3f sig=%.4f",
+    PHOENIX_LOGI(TAG, "Cal point %u: conc=%.3f sig=%.4f",
              workflow_count_,
              static_cast<double>(concentration),
              static_cast<double>(signal));
@@ -65,7 +65,7 @@ Result<FivePLParams> CalibrationService::fitCurve() {
         active_.num_points = workflow_count_;
         memcpy(active_.points, workflow_pts_, sizeof(workflow_pts_));
 
-        ESP_LOGI(TAG, "5PL fit: A=%.3f B=%.3f C=%.3f D=%.3f E=%.3f R²=%.4f",
+        PHOENIX_LOGI(TAG, "5PL fit: A=%.3f B=%.3f C=%.3f D=%.3f E=%.3f R²=%.4f",
                  static_cast<double>(active_.params.A),
                  static_cast<double>(active_.params.B),
                  static_cast<double>(active_.params.C),
@@ -97,13 +97,13 @@ Result<void> CalibrationService::validateCalibration() {
     // Max residual should be < 10% of range
     float range = fabsf(active_.params.D - active_.params.A);
     if (range > 0.0f && max_residual / range > 0.10f) {
-        ESP_LOGW(TAG, "Max residual %.4f exceeds 10%% of range %.4f",
+        PHOENIX_LOGW(TAG, "Max residual %.4f exceeds 10%% of range %.4f",
                  static_cast<double>(max_residual),
                  static_cast<double>(range));
         return Err(ErrorCategory::CALIBRATION_ERROR, "Residuals too large");
     }
 
-    ESP_LOGI(TAG, "Calibration validated (R²=%.4f, max_res=%.4f)",
+    PHOENIX_LOGI(TAG, "Calibration validated (R²=%.4f, max_res=%.4f)",
              static_cast<double>(active_.params.r_squared),
              static_cast<double>(max_residual));
     return Ok();
@@ -139,7 +139,7 @@ Result<void> CalibrationService::saveCalibration(const char* id) {
     }
 
     workflow_active_ = false;
-    ESP_LOGI(TAG, "Calibration '%s' saved (%u points)", id, active_.num_points);
+    PHOENIX_LOGI(TAG, "Calibration '%s' saved (%u points)", id, active_.num_points);
     return Ok();
 }
 
@@ -177,7 +177,7 @@ Result<CalibrationData> CalibrationService::loadCalibration(const char* id) {
     }
 
     active_ = cal;
-    ESP_LOGI(TAG, "Loaded calibration '%s' (%u points, R²=%.4f)",
+    PHOENIX_LOGI(TAG, "Loaded calibration '%s' (%u points, R²=%.4f)",
              id, cal.num_points,
              static_cast<double>(cal.params.r_squared));
     return Ok(cal);
@@ -194,7 +194,7 @@ Result<float> CalibrationService::signalToConcentration(float signal) const {
 
     // Range check
     if (conc < active_.range_low || conc > active_.range_high) {
-        ESP_LOGW(TAG, "Concentration %.3f outside range [%.3f, %.3f]",
+        PHOENIX_LOGW(TAG, "Concentration %.3f outside range [%.3f, %.3f]",
                  static_cast<double>(conc),
                  static_cast<double>(active_.range_low),
                  static_cast<double>(active_.range_high));

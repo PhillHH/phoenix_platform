@@ -34,6 +34,8 @@ set(TEST_SOURCES
     test_calibration.cpp
     test_uart_bridge.cpp
     test_nvs_storage.cpp
+    test_logger.cpp
+    test_error_registry.cpp
     run_all.cpp
 )
 

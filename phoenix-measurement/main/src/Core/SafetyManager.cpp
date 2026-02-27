@@ -4,7 +4,7 @@
 // ==========================================================================
 
 #include "phoenix/Core/SafetyManager.h"
-#include <esp_log.h>
+#include "phoenix/Core/Logger.h"
 #include <esp_system.h>
 #include <esp_heap_caps.h>
 #include <esp_timer.h>
@@ -18,7 +18,7 @@ namespace phoenix {
 static const char* TAG = "Safety";
 
 Result<DiagnosticsReport> SafetyManager::performPowerOnSelfTest() {
-    ESP_LOGI(TAG, "========== POWER-ON SELF TEST ==========");
+    PHOENIX_LOGI(TAG, "========== POWER-ON SELF TEST ==========");
 
     DiagnosticsReport report = {};
     report.uptime_seconds = static_cast<uint32_t>(
@@ -32,33 +32,33 @@ Result<DiagnosticsReport> SafetyManager::performPowerOnSelfTest() {
         report.heap_min_free_kb = static_cast<float>(
             esp_get_minimum_free_heap_size()) / 1024.0f;
         report.psram_ok = (heap_caps_get_total_size(MALLOC_CAP_SPIRAM) > 0);
-        ESP_LOGI(TAG, "RAM:   OK (%.1f kB free, PSRAM=%s)",
+        PHOENIX_LOGI(TAG, "RAM:   OK (%.1f kB free, PSRAM=%s)",
                  static_cast<double>(report.heap_free_kb),
                  report.psram_ok ? "yes" : "no");
     } else {
-        ESP_LOGE(TAG, "RAM:   FAIL - %s", ram_res.error().message);
+        PHOENIX_LOGE(TAG, "RAM:   FAIL - %s", ram_res.error().message);
     }
 
     // ── Flash Test ─────────────────────────────────────────────────
     auto flash_res = testFlash();
     report.flash_ok = flash_res.is_ok();
-    ESP_LOGI(TAG, "Flash: %s", report.flash_ok ? "OK" : "FAIL");
+    PHOENIX_LOGI(TAG, "Flash: %s", report.flash_ok ? "OK" : "FAIL");
 
     // ── Camera Test ────────────────────────────────────────────────
     auto cam_res = testCamera();
     report.camera_ok = cam_res.is_ok();
-    ESP_LOGI(TAG, "Camera:%s%s", report.camera_ok ? " OK" : " FAIL",
+    PHOENIX_LOGI(TAG, "Camera:%s%s", report.camera_ok ? " OK" : " FAIL",
              cam_res.is_err() ? cam_res.error().message : "");
 
     // ── LED Test ───────────────────────────────────────────────────
     auto led_res = testLED();
     report.led_ok = led_res.is_ok();
-    ESP_LOGI(TAG, "LED:   %s", report.led_ok ? "OK" : "FAIL");
+    PHOENIX_LOGI(TAG, "LED:   %s", report.led_ok ? "OK" : "FAIL");
 
     // ── UART Test ──────────────────────────────────────────────────
     auto uart_res = testUART();
     report.uart_ok = uart_res.is_ok();
-    ESP_LOGI(TAG, "UART:  %s", report.uart_ok ? "OK" : "FAIL");
+    PHOENIX_LOGI(TAG, "UART:  %s", report.uart_ok ? "OK" : "FAIL");
 
     // ── Overall Health Score ───────────────────────────────────────
     int checks_passed = 0;
@@ -74,7 +74,7 @@ Result<DiagnosticsReport> SafetyManager::performPowerOnSelfTest() {
 
     last_report_ = report;
 
-    ESP_LOGI(TAG, "========== POST COMPLETE: %.0f%% (%d/%d) ==========",
+    PHOENIX_LOGI(TAG, "========== POST COMPLETE: %.0f%% (%d/%d) ==========",
              static_cast<double>(report.overall_health),
              checks_passed, checks_total);
 
@@ -92,18 +92,18 @@ Result<void> SafetyManager::checkMemoryIntegrity() {
 
     // Critical: below 16 kB is dangerous on ESP32
     if (free_heap < 16 * 1024) {
-        ESP_LOGE(TAG, "CRITICAL: Heap low (%u bytes)", free_heap);
+        PHOENIX_LOGE(TAG, "CRITICAL: Heap low (%u bytes)", free_heap);
         return Err(ErrorCategory::MEMORY_ERROR, "Heap critically low");
     }
 
     // Warning: below 32 kB
     if (free_heap < 32 * 1024) {
-        ESP_LOGW(TAG, "WARNING: Heap low (%u bytes)", free_heap);
+        PHOENIX_LOGW(TAG, "WARNING: Heap low (%u bytes)", free_heap);
     }
 
     // Check heap corruption (ESP-IDF feature)
     if (!heap_caps_check_integrity_all(true)) {
-        ESP_LOGE(TAG, "CRITICAL: Heap corruption detected!");
+        PHOENIX_LOGE(TAG, "CRITICAL: Heap corruption detected!");
         return Err(ErrorCategory::MEMORY_ERROR, "Heap corruption");
     }
 
@@ -117,7 +117,7 @@ Result<void> SafetyManager::monitorTemperature() {
     last_report_.cpu_temp_celsius = 45.0f;  // Placeholder
 
     if (last_report_.cpu_temp_celsius > 85.0f) {
-        ESP_LOGE(TAG, "Temperature critical: %.1f°C",
+        PHOENIX_LOGE(TAG, "Temperature critical: %.1f°C",
                  static_cast<double>(last_report_.cpu_temp_celsius));
         return Err(ErrorCategory::SAFETY_VIOLATION, "Over-temperature");
     }
@@ -133,7 +133,7 @@ Result<void> SafetyManager::checkVoltages() {
 
     // Li-Ion low voltage cutoff: 3.0V
     if (voltage < 3.0f && voltage > 0.5f) {  // > 0.5 to avoid false trigger on USB
-        ESP_LOGW(TAG, "Battery low: %.2fV", static_cast<double>(voltage));
+        PHOENIX_LOGW(TAG, "Battery low: %.2fV", static_cast<double>(voltage));
         return Err(ErrorCategory::SAFETY_VIOLATION, "Battery low voltage");
     }
 
@@ -141,7 +141,7 @@ Result<void> SafetyManager::checkVoltages() {
 }
 
 void SafetyManager::emergencyShutdown(const char* reason) {
-    ESP_LOGE(TAG, "!!! EMERGENCY SHUTDOWN: %s !!!", reason);
+    PHOENIX_LOGE(TAG, "!!! EMERGENCY SHUTDOWN: %s !!!", reason);
 
     // 1. Turn off all LEDs
     // 2. Stop measurement
@@ -168,7 +168,7 @@ Result<void> SafetyManager::initWatchdog(uint32_t timeout_ms) {
     }
 
     watchdog_initialized_ = true;
-    ESP_LOGI(TAG, "Watchdog: %u ms", timeout_ms);
+    PHOENIX_LOGI(TAG, "Watchdog: %u ms", timeout_ms);
     return Ok();
 }
 
